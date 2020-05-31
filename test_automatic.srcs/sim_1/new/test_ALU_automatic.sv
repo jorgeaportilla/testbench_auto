@@ -1,60 +1,62 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 05/23/2020 12:32:23 PM
-// Design Name: 
-// Module Name: test_ALU_automatic
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-//////////////////////////////////////////////////////////////////////////////////
+timeunit 0.1ns; timeprecision 0.1ns;
 
-
-module test_ALU_automatic(
-
-    );
-     parameter N = 8;
-    logic clk;
-    logic [N-1:0]a,b;
-    logic [3:0]opcode;
-    logic cin;
-    logic [N-1:0] y;
-    integer count_pass = 0;
-    integer count_fails = 0;
+/**/module test_task_ALU( );
+    parameter             N = 8;  //length vectors
+    logic                 [N-1:0]a,b;
+    logic                 [3:0]opcode;
+    logic                 cin;
+    logic                 [N-1:0] y;
+    logic                 clk;
+    integer               count_pass = 0;
+    integer               count_fails = 0;
     
+    always #1 clk = ~clk;
     ALU #(.N(N))DUT_ALU (.*);
-   
+    
+    integer i=0;
     initial begin
- 
-                                                                        $display("  a  |   b  | cin | operation |  y  | \n");
-            a = 'b00000001;  b = 'b00000010; cin =  1'b1; opcode= 4'd1; #1 $write("%2d | %2d | %2d | %b | %3d \n" , a,b,cin,opcode,y);
-            if(y == 'b11111101) count_pass  += 1; else count_fails  += 1; 
-        #10 a = 'b00001011;  b = 'b00000011; cin =  1'b1; opcode= 4'd0; #1 $write("%2d | %2d | %2d | %b | %3d \n", a,b,cin,opcode,y);
-            if(y == 8'b11110100) count_pass  += 1; else count_fails  += 1; 
-        #10 a = 'b00001000;  b = 'b00000010; cin =  1'b1; opcode= 4'b1110; #1 $write("%2d | %2d | %2d | %b | %3d \n", a,b,cin,opcode,y);
-            if(y == 8'd10) count_pass  += 1; else count_fails  += 1; 
-        #10 a = 'b00001000;  b = 'b00000010; cin =  1'b1; opcode= 4'b1111; #1 $write("%2d | %2d | %2d | %b | %3d \n", a,b,cin,opcode,y);
-            if(y == 8'd11) count_pass  += 1; else count_fails  += 1; 
-        
-        #10 a = 'b00001001;  b = 'b00000011; cin =  1'b1; opcode= 4'b0110; #1 $write("%2d | %2d | %2d | %b | %3d \n", a,b,cin,opcode,y);
-            if(y == 8'b00001010) count_pass  += 1; else count_fails  += 1; 
-        #10 a = 'b00001000;  b = 'b00000010; cin =  1'b1; opcode= 4'b0111; #1 $write("%2d | %2d | %2d | %b | %3d \n", a,b,cin,opcode,y);
-            if(y == 8'b11110101) count_pass  += 1; else count_fails  += 1; 
-        #1
-    if (count_fails > 0)  $display("FAIL"); else $display("PASS");
-    $display("Failed (%1d) and passed  (%1d) operations",count_fails,count_pass);
-       
-    
-    end
-    
+        clk=0;
+        a =0;
+        b = 0;
+        cin = 0;
+        opcode = 0;
+        $display("Begining Test Bench");
+      
+        repeat (800) begin
+            @(negedge clk)
+            i+=1;
+            a = $urandom_range(0,255);  //(std::randomize (a) with {a>=10; a <=20;});
+            b = $urandom_range(0,255); //(std::randomize (b) with {b <=10;});
+            cin = $urandom_range(0,1);
+            opcode = $urandom_range(0,16);
+            @ (negedge clk); check_results;
+        end
+             if (count_fails > 0)  $display("*********FAIL*********"); else $display("*********PASS*********");
+            $display("Failed (%1d) and Passed  (%1d) operations",count_fails,count_pass);
+      end
+      
+      task check_results;
+          case (opcode)
+              'd0 : if(y ==  ~a) count_pass  += 1; else count_fails  += 1; 
+              'd1 : if(y ==  ~b) count_pass  += 1; else count_fails  += 1; 
+              'd2  : if(y ==   (a & b))  count_pass  += 1; else count_fails  += 1; 
+              'd3  : if(y ==   (a | b))  count_pass  += 1; else count_fails  += 1; 
+              'd4  : if(y == ~(a & b)) count_pass  += 1; else count_fails  += 1; 
+              'd5  : if(y == ~(a | b)) count_pass  += 1; else count_fails  += 1; 
+              'd6  : if(y ==   a ^ b) count_pass  += 1; else count_fails  += 1; 
+              'd7  : if(y == ~(a ^ b)) count_pass  += 1; else count_fails  += 1; 
+              'd8  : if(y ==  a)     count_pass  += 1; else count_fails  += 1;  
+              'd9  : if(y == b)      count_pass  += 1; else count_fails  += 1; 
+              'd10 : if(y == a + 1) count_pass  += 1; else count_fails  += 1; 
+              'd11 : if(y == b + 1) count_pass  += 1; else count_fails  += 1; 
+              'd12 : if(y ==  a - 1) count_pass  += 1; else count_fails  += 1; 
+              'd13 : if(y == b - 1) count_pass  += 1; else count_fails  += 1; 
+              'd14 : if(y == a + b) count_pass  += 1; else count_fails  += 1; 
+              'd15 : if(y == a + b+ cin) count_pass  += 1; else count_fails  += 1;      
+              default : y=  a + b + cin;
+             endcase
+             $write("%d) A: %3d \t B:%3d \t Cin:%1d \t opcode:%b \t rta:%4d \n",i,a,b,cin,opcode,y);
+    endtask
 endmodule
 
 
