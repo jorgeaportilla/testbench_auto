@@ -30,13 +30,13 @@ module ALU #(parameter N = 8)
     
     always_comb begin
         case (opcode[2:0])
-            'b0000 :  y_logic =  ~a;      //NOT A
-            'b0001 :  y_logic =  ~b;      //NOT B
-            'b0010 :  y_logic =   a & b;  //A AND B
-            'b0011 :  y_logic =   a | b;  //A OR B
-            'b0100 :  y_logic =  ~(a & b);  //A NAND B
-            'b0101 :  y_logic = ~(a | b); //A NOR B
-            'b0110 :  y_logic =   a ^ b;  //A XOR B
+            'b000 :  y_logic =  ~a;      //NOT A
+            'b001 :  y_logic =  ~b;      //NOT B
+            'b010 :  y_logic =   a & b;  //A AND B
+            'b011 :  y_logic =   a | b;  //A OR B
+            'b100 :  y_logic =  ~(a & b);  //A NAND B
+            'b101 :  y_logic = ~(a | b); //A NOR B
+            'b110 :  y_logic =   a ^ b;  //A XOR B
             default : y_logic =  ~(a ^ b); //A XNOR B
          endcase
          
